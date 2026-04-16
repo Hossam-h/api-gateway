@@ -12,7 +12,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = request.headers['authorization'];
 
-    if (!token) throw new UnauthorizedException('No token provided');
+    if (!token) throw new UnauthorizedException('no token provided');
 
     try {
       const { data } = await axios.get('http://localhost:3001/auth/validate', {
