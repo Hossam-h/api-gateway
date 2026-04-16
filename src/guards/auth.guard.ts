@@ -21,7 +21,6 @@ export class AuthGuard implements CanActivate {
 
       if (!data.valid) throw new UnauthorizedException('Invalid token');
 
-      // بنحط بيانات اليوزر في الـ request عشان نستخدمها في الـ controllers
       request.user = { userId: data.userId, email: data.email, role: data.role };
       return true;
     } catch {

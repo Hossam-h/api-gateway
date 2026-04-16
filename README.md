@@ -1,98 +1,221 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# VM Platform - Microservices Architecture
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A Virtual Machine Management Platform built with NestJS using Microservices Architecture.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Architecture Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+```
+Client
+  │
+  ▼
+API Gateway (Port 3000)
+  │
+  ├──► Auth Service (Port 3001)
+  │         └── auth_db (PostgreSQL)
+  │
+  └──► Machine Service (Port 3002)
+            └── machine_db (PostgreSQL)
 ```
 
-## Compile and run the project
+### Services
 
-```bash
-# development
-$ npm run start
+| Service | Port | Responsibility |
+|---|---|---|
+| API Gateway | 3000 | Routes requests, validates tokens |
+| Auth Service | 3001 | Register, Login, JWT tokens |
+| Machine Service | 3002 | Create and manage VMs |
 
-# watch mode
-$ npm run start:dev
+---
 
-# production mode
-$ npm run start:prod
+## Tech Stack
+
+- **Framework:** NestJS with Express
+- **Database:** PostgreSQL + TypeORM
+- **Authentication:** JWT (Access + Refresh tokens)
+- **Communication:** REST via Axios
+- **Validation:** class-validator
+
+---
+
+## Project Structure
+
+```
+api-gateway/
+   └── src/
+       ├── auth/
+       ├── machines/
+       ├── guards/
+       │   └── auth.guard.ts
+       ├── app.module.ts
+       └── main.ts
+
+ auth-service/
+    └── src/
+        ├── auth/
+        │   ├── dto/
+        │   ├── entities/
+        │   ├── auth.controller.ts
+        │   ├── auth.service.ts
+        │   └── auth.module.ts
+        ├── app.module.ts
+        └── main.ts
+
+machine-service/
+    └── src/
+        ├── machines/
+        │   ├── dto/
+        │   ├── entities/
+        │   ├── machines.controller.ts
+        │   ├── machines.service.ts
+        │   └── machines.module.ts
+        ├── app.module.ts
+        └── main.ts
 ```
 
-## Run tests
+---
 
-```bash
-# unit tests
-$ npm run test
+## Prerequisites
 
-# e2e tests
-$ npm run test:e2e
+- Node.js v18+
+- PostgreSQL
+- NestJS CLI: `npm install -g @nestjs/cli`
 
-# test coverage
-$ npm run test:cov
+---
+
+## Setup & Installation
+
+### 1. Create Databases
+
+Open PostgreSQL and run:
+
+```sql
+CREATE DATABASE auth_db;
+CREATE DATABASE machine_db;
 ```
 
-## Deployment
+### 2. Configure Environment Variables
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Create a `.env` file in each service:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+**auth-service/.env**
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=your_password
+DB_NAME=auth_db
+JWT_SECRET=secret123
+JWT_REFRESH_SECRET=refresh_secret123
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+**machine-service/.env**
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=your_password
+DB_NAME=machine_db
+```
 
-## Resources
+### 3. Install Dependencies
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# Auth Service
+cd auth-service
+npm install
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Machine Service
+cd ../machine-service
+npm install
 
-## Support
+# API Gateway
+cd ../api-gateway
+npm install
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 4. Run All Services
 
-## Stay in touch
+Open **3 separate terminals**:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+# Terminal 1 - Auth Service
+cd auth-service && npm run start:dev
 
-## License
+# Terminal 2 - Machine Service
+cd machine-service && npm run start:dev
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Terminal 3 - API Gateway
+cd api-gateway && npm run start:dev
+```
+
+---
+
+## API Endpoints
+
+All requests go through the **API Gateway on port 3000**.
+
+### Auth
+
+#### Register
+```
+POST http://localhost:3000/auth/register
+```
+```json
+{
+  "email": "test@test.com",
+  "password": "123456"
+}
+```
+
+#### Login
+```
+POST http://localhost:3000/auth/login
+```
+```json
+{
+  "email": "test@test.com",
+  "password": "123456"
+}
+```
+Returns `accessToken` and `refreshToken`.
+
+---
+
+### Machines (Requires Authorization Header)
+
+> Add `Authorization: Bearer <accessToken>` to all machine requests.
+
+#### Create VM
+```
+POST http://localhost:3000/machines
+```
+```json
+{
+  "hostname": "my-server",
+  "password": "vm_password",
+  "cpuCores": 4,
+  "memorySize": 8,
+  "diskSize": 100,
+  "os": "Ubuntu 22.04"
+}
+```
+
+#### Get My VMs
+```
+GET http://localhost:3000/machines?page=1&limit=10
+```
+
+
+## Key Design Decisions
+
+### Why UUID over Incremental ID?
+Each service has its own database. UUID guarantees globally unique IDs across all services without conflicts.
+
+
+## Assumptions
+
+- Passwords stored in the machine are not encrypted (mocked VM creation)
+- No external cloud provider integration (mocked)
+- `synchronize: true` used for development (use migrations in production)
